@@ -14,6 +14,7 @@ webcontent = Table('webcontent', metadata,
     Column('link', String(500)),
     Column('source', String(50)),
     Column('inserted_at', DateTime, default=datetime.utcnow),
+    Column('comment_link', String(500))
 )
 metadata.create_all(engine)
 
@@ -30,15 +31,20 @@ content.extend(redp.content_arr())
 ins = webcontent.insert()
 
 # Insert the content obtained from web pages into database
+now = datetime.utcnow()
 for item in content:
-	print item
-	conn.execute(ins, title=item['title'], link=item['link'], source=item['source'])
+	conn.execute(ins, 
+		title=item['title'], 
+		link=item['link'], 
+		source=item['source'], 
+		inserted_at=now, 
+		comment_link=item['comment_link'])
 
 sel = webcontent.select()
 rs = conn.execute(sel)
 row = rs.fetchone()
-for row in rs:
-    print row.title, row.link
+# for row in rs:
+#     print row.title, row.link
 
 # Close connections when done
 rs.close()
