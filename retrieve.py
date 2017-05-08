@@ -33,15 +33,18 @@ class HNParser(object):
 
 class REDParser(object):
 
-	def __init__(self):
+	def __init__(self, username):
 		self.base_link = 'https://www.reddit.com'
 		self.base_link_rq = 'https://www.reddit.com/r/programming.json?limit='
 		self.page_limit = 2
 		self.page_size = 25
+		self.username = username
+		self.user_agent = "python:techlinks.aggregator:v1.0 by /u/" + self.username
 
 	def get_content(self):
 		link = self.base_link_rq + str(self.page_limit * self.page_size)
-		r = requests.get(link)
+		headers = {'User-Agent': self.user_agent}
+		r = requests.get(link, headers=headers)
 		if r.status_code != requests.codes.ok:
 			raise RequestException("A bad status code of " + str(r.status_code) + " was returned")
 		return r.text
@@ -59,13 +62,3 @@ class REDParser(object):
 		)
 		content = reduce(build_list, page_content, []) 
 		return content
-		
-		
-# Quick Test
-# hn = HNParser()
-# hn.get_page(1)
-# print len(hn.content_arr())
-# hn.get_page(2)
-# print hn.content_arr()
-# rd = REDParser()
-# print rd.content_arr()

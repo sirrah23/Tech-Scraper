@@ -1,5 +1,6 @@
 from datetime import *
 from sqlalchemy import *
+import os
 from retrieve import HNParser, REDParser
 
 # Connect to the database
@@ -20,7 +21,7 @@ metadata.create_all(engine)
 
 # Initialize data gathering objects
 hnp = HNParser()	# Gets data from hacker news
-redp = REDParser()	# Gets data from reddit
+redp = REDParser(os.environ["REDDIT_USERNAME"])	# Gets data from reddit
 
 # Get content from web pages
 # TODO: Catch RequestException at some point
@@ -31,20 +32,22 @@ content.extend(redp.content_arr())
 ins = webcontent.insert()
 
 # Insert the content obtained from web pages into database
+# TODO: Filter out zero width spaces \u200\b (#&8203)
 now = datetime.utcnow()
 for item in content:
-	conn.execute(ins, 
-		title=item['title'], 
-		link=item['link'], 
-		source=item['source'], 
-		inserted_at=now, 
-		comment_link=item['comment_link'])
+        try:
+            conn.execute(ins, 
+                    title=item['title'], 
+                    link=item['link'], 
+                    source=item['source'], 
+                    inserted_at=now, 
+                    comment_link=item['comment_link'])
+        except:
+            print "Could not insert " + item
 
 sel = webcontent.select()
 rs = conn.execute(sel)
 row = rs.fetchone()
-# for row in rs:
-#     print row.title, row.link
 
 # Close connections when done
 rs.close()
