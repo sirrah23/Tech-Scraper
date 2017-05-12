@@ -16,6 +16,12 @@ class HNParser(object):
 			raise RequestException("A bad status code of " + str(r.status_code) + " was returned")
 		return r.text
 
+	def clean_relative_link(link):
+		if link.find("/item?") == 0 :
+			return self.base_link + link
+		else:
+			return link
+
 	def content_arr(self):
 		for i in xrange(1, self.page_limit+1):
 			page_content = self.get_page(i)
@@ -25,11 +31,11 @@ class HNParser(object):
 			for item in items:
 				item_id = item.attrs['id']
 				story = item.find('a', 'storylink')
-				link = story.attrs['href']
+				link = self.clean_relative_link(story.attrs['href'])
 				title = story.get_text()
 				comment_link = self.base_link + '/item?id=' + item_id
 				content.append({'link': link, 'title': title, 'source':'hn', 'comment_link': comment_link})
-		return content 
+		return content
 
 class REDParser(object):
 
@@ -53,12 +59,12 @@ class REDParser(object):
 		content_text = self.get_content()
 		page_content = json.loads(content_text)['data']['children']
 		build_list = (
-			lambda acc, item: 
+			lambda acc, item:
 			acc + [{'link': item['data']['url'],
 			 		'title': item['data']['title'],
 			 		'source': 'reddit',
 			 		'comment_link': self.base_link + item['data']['permalink']
 			 		}]
 		)
-		content = reduce(build_list, page_content, []) 
+		content = reduce(build_list, page_content, [])
 		return content
