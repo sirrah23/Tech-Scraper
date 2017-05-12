@@ -16,7 +16,7 @@ class HNParser(object):
 			raise RequestException("A bad status code of " + str(r.status_code) + " was returned")
 		return r.text
 
-	def clean_relative_link(link):
+	def clean_relative_link(self, link):
 		if link.find("/item?") == 0 :
 			return self.base_link + link
 		else:

@@ -15,7 +15,8 @@ webcontent = Table('webcontent', metadata,
     Column('link', String(500)),
     Column('source', String(50)),
     Column('inserted_at', DateTime, default=datetime.utcnow),
-    Column('comment_link', String(500))
+    Column('comment_link', String(500)),
+    Column('is_favorite', Boolean, default=False)
 )
 metadata.create_all(engine)
 
@@ -36,14 +37,14 @@ ins = webcontent.insert()
 now = datetime.utcnow()
 for item in content:
         try:
-            conn.execute(ins, 
-                    title=item['title'], 
-                    link=item['link'], 
-                    source=item['source'], 
-                    inserted_at=now, 
+            conn.execute(ins,
+                    title=item['title'],
+                    link=item['link'],
+                    source=item['source'],
+                    inserted_at=now,
                     comment_link=item['comment_link'])
-        except:
-            print "Could not insert " + item
+        except Exception as e:
+            print e
 
 sel = webcontent.select()
 rs = conn.execute(sel)
